@@ -3,6 +3,7 @@ package BrickBreaker;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+// TODO - Step09 : 출력 가능한 객체를 Drawable 타입으로 선언
 public class Paddle extends Rectangle implements Drawable {
     private double speed; // 패들의 이동 속도
     private Color color; // 패들의 색상

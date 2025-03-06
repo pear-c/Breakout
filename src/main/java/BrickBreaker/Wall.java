@@ -3,6 +3,7 @@ package BrickBreaker;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+// TODO - Step09 : 출력 가능한 객체를 Drawable 타입으로 선언
 public class Wall extends Rectangle implements Drawable {
     public Wall(double x, double y, double width, double height) {
         super(x, y, width, height);

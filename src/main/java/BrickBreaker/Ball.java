@@ -3,6 +3,7 @@ package BrickBreaker;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+// TODO - Step09 : 출력 가능한 객체를 Drawable 타입으로 선언
 public class Ball extends Circle implements Drawable {
     private double dx; // 공의 x축 속도 (단위: 픽셀/프레임)
     private double dy; // 공의 y축 속도 (단위: 픽셀/프레임)
