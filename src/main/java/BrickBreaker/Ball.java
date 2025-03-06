@@ -28,21 +28,16 @@ public class Ball extends Circle {
         y += dy; // y축 위치 업데이트
     }
 
-    // 공이 화면 경계와 충돌했는지 확인 및 속도 반전
-    public void checkCollision(double canvasWidth, double canvasHeight) {
+    // 공이 벽에 충돌했는지 확인 및 속도 반전
+    public void checkCollision(Wall wall) {
         // 좌우 경계 충돌
-        if(getMinX() <= 0 || getMaxX() >= canvasWidth) {
+        if(getMinX() <= wall.getMinX() || getMaxX() >= wall.getMaxX()) {
             dx = -dx; // x축 속도 반전
         }
         // 상하 경계 충돌
-        if(getMinY() <= 0 || getMaxY() >= canvasHeight) {
+        if(getMinY() <= wall.getMinY() || getMaxY() >= wall.getMaxY()) {
             dy = -dy; // y축 속도 반전
         }
-    }
-
-    // TODO - Step07 : 땅에 닿았는지 확인용 메서드
-    public boolean isTouchedFloor(double canvasHeight) {
-        return getMaxY() >= canvasHeight;
     }
 
     // Getter와 Setter (필요 시 사용)
