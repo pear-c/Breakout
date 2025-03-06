@@ -3,7 +3,7 @@ package BrickBreaker;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-public class Paddle extends Rectangle {
+public class Paddle extends Rectangle implements Drawable {
     private double speed; // 패들의 이동 속도
     private Color color; // 패들의 색상
 

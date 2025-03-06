@@ -3,7 +3,7 @@ package BrickBreaker;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-public class Wall extends Rectangle {
+public class Wall extends Rectangle implements Drawable {
     public Wall(double x, double y, double width, double height) {
         super(x, y, width, height);
     }
