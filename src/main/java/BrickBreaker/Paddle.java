@@ -41,10 +41,6 @@ public class Paddle extends Rectangle {
 
     // 공과 충돌 여부 확인
     public boolean checkCollision(Ball ball) {
-        double ballX = ball.getX();
-        double ballY = ball.getY();
-        double ballRadius = ball.getRadius();
-
         return ball.getMaxY() >= getMinY() &&
                 ball.getMinY() < getMinY() &&
                 ball.getMaxX() > getMinX() &&
