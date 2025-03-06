@@ -4,21 +4,13 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 // TODO - Step09 : 출력 가능한 객체를 Drawable 타입으로 선언
-public class Paddle extends Rectangle implements Drawable {
+public class Paddle extends Rectangle {
     private double speed; // 패들의 이동 속도
-    private Color color; // 패들의 색상
 
     // 생성자
     public Paddle(double x, double y, double width, double height, double speed, Color color) {
-        super(x, y, width, height);
+        super(x, y, width, height, color);
         this.speed = speed;
-        this.color = color;
-    }
-
-    // 패들을 그리는 메서드
-    public void draw(GraphicsContext gc) {
-        gc.setFill(color);
-        gc.fillRect(getMinX(), getMinY(), width, height); // 중심을 기준으로 사각형 그리기
     }
 
     // 패들의 위치를 왼쪽으로 이동
