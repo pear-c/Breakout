@@ -3,7 +3,8 @@ package BrickBreaker;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-public class Brick extends Rectangle{
+// TODO - Step09 : 출력 가능한 객체를 Drawable 타입으로 선언
+public class Brick extends Rectangle implements Drawable {
     private Color color; // 벽돌의 색상
     private boolean isDestroyed; // 벽돌이 파괴되었는지 여부
 
@@ -18,7 +19,7 @@ public class Brick extends Rectangle{
     public void draw(GraphicsContext gc) {
         if (!isDestroyed) {
             gc.setFill(color);
-            gc.fillRect(x, y, width, height); // 벽돌 그리기
+            gc.fillRect(getMinX(), getMinY(), width, height); // 벽돌 그리기
         }
     }
 
