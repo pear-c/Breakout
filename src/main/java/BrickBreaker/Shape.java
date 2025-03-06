@@ -1,5 +1,7 @@
 package BrickBreaker;
 
+import javafx.scene.canvas.GraphicsContext;
+
 public abstract class Shape {
     protected double x, y;    // 중심 좌표
 
