@@ -13,6 +13,13 @@ public class Wall extends Rectangle {
         return ball.getMaxY() >= getMaxY();
     }
 
+    // 공이 벽에 닿으면 튕겨내는 메서드
+    public void reflectBall(Ball ball) {
+        if(ball.isCollisionDetected(this)) {
+            ball.bounce(this);
+        }
+    }
+
     @Override
     public void draw(GraphicsContext gc) {
         gc.setStroke(color);
