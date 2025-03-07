@@ -5,6 +5,7 @@ import javafx.scene.paint.Color;
 import java.util.List;
 
 // TODO - Step10 : 이동하는 객체를 Movable 한 객체로 분류 및 오버라이딩
+// TODO - Step11 : Bounceable 성질 표현
 public class Ball extends Circle implements Movable, Bounceable{
     private double dx; // 공의 x축 속도 (단위: 픽셀/프레임)
     private double dy; // 공의 y축 속도 (단위: 픽셀/프레임)
@@ -16,21 +17,6 @@ public class Ball extends Circle implements Movable, Bounceable{
         this.dx = dx;
         this.dy = dy;
         this.isPaused = false;
-    }
-
-    // 위치 보정하는 메서드 (충돌 발생 시 실행)
-    public void resolveCollision(Shape other) {
-        // 벽과 충돌 했을 시에는 x축, y축 속도 각각 반전
-        if(other instanceof Wall wall) {
-            // 좌우 경계 충돌
-            if(getMinX() <= wall.getMinX() || getMaxX() >= wall.getMaxX()) {
-                dx = -dx; // x축 속도 반전
-            }
-            // 상하 경계 충돌
-            if(getMinY() <= wall.getMinY() || getMaxY() >= wall.getMaxY()) {
-                dy = -dy; // y축 속도 반전
-            }
-        }
     }
 
     @Override
@@ -80,21 +66,42 @@ public class Ball extends Circle implements Movable, Bounceable{
                 getMinY() <= other.getMaxY();
     }
 
+    // TODO - Step11 : Bounceable 성질 표현
     @Override
     public void bounce(Shape other) {
-        // 옆면과 부딪힐 때
-        if(getMaxX() >= other.getMinX() && getMinX() <= other.getMaxX()) {
-            setDx(-dx);
+        boolean collisionX = (getMaxX() >= other.getMinX() && getMinX() <= other.getMaxX());
+        boolean collisionY = (getMinY() <= other.getMaxY() && getMaxY() >= other.getMinY());
+
+        // 벽과의 충돌 계산은 조금 다름. (Wall 클래스 설계 참고)
+        if(other instanceof Wall) {
+            boolean collisionWithWallX = (getMinX() <= other.getMinX() || getMaxX() >= other.getMaxX());
+            boolean collisionWithWallY = (getMinY() <= other.getMinY() || getMaxY() >= other.getMaxY());
+
+            if(collisionWithWallX && collisionWithWallY) {
+                setDx(-dx);
+                setDy(-dy);
+            }
+            else if(collisionWithWallX) {
+                setDx(-dx);
+            }
+            else if(collisionWithWallY) {
+                setDy(-dy);
+            }
         }
-        // 윗쪽, 아랫쪽과 부딪힐 때
-        else if(getMinY() <= other.getMaxY() && getMaxY() >= other.getMinY()) {
-            setDy(-dy);
-        }
-        // 꼭짓점에 부딪힐 때
-        else if(getMaxX() >= other.getMinX() && getMinX() <= other.getMaxX() &&
-                getMinY() <= other.getMaxY() && getMaxY() >= other.getMinY()) {
-            setDx(-dx);
-            setDy(-dy);
+        else {
+            // 꼭짓점에 부딪혔을 경우
+            if(collisionX && collisionY) {
+                setDx(-dx);
+                setDy(-dy);
+            }
+            // 옆면과 부딪혔을 경우
+            else if(collisionX) {
+                setDx(-dx);
+            }
+            // 윗쪽, 아랫쪽과 부딪혔을 경우
+            else if(collisionY) {
+                setDy(-dy);
+            }
         }
     }
 }
