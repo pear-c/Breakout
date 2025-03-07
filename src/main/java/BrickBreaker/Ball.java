@@ -71,36 +71,36 @@ public class Ball extends Circle implements Movable, Bounceable{
     public void bounce(Shape other) {
         boolean collisionX = (getMaxX() >= other.getMinX() && getMinX() <= other.getMaxX());
         boolean collisionY = (getMinY() <= other.getMaxY() && getMaxY() >= other.getMinY());
+        boolean collisionXY = (getMaxX() == other.getMinX() && getMaxY() == other.getMinY()) ||  // 좌상단 모서리
+                            (getMaxX() == other.getMinX() && getMinY() == other.getMaxY()) ||  // 좌하단 모서리
+                            (getMinX() == other.getMaxX() && getMaxY() == other.getMinY()) ||  // 우상단 모서리
+                            (getMinX() == other.getMaxX() && getMinY() == other.getMaxY());    // 우하단 모서리
 
         // 벽과의 충돌 계산은 조금 다름. (Wall 클래스 설계 참고)
         if(other instanceof Wall) {
             boolean collisionWithWallX = (getMinX() <= other.getMinX() || getMaxX() >= other.getMaxX());
             boolean collisionWithWallY = (getMinY() <= other.getMinY() || getMaxY() >= other.getMaxY());
 
-            if(collisionWithWallX && collisionWithWallY) {
-                setDx(-dx);
-                setDy(-dy);
-            }
-            else if(collisionWithWallX) {
+            if(collisionWithWallX) {
                 setDx(-dx);
             }
-            else if(collisionWithWallY) {
+            if(collisionWithWallY) {
                 setDy(-dy);
             }
         }
         else {
-            // 꼭짓점에 부딪혔을 경우
-            if(collisionX && collisionY) {
+            // 모서리에 부딪혔을 경우
+            if(collisionXY) {
                 setDx(-dx);
+                setDy(-dy);
+            }
+            // 윗쪽, 아랫쪽과 부딪혔을 경우
+            else if(collisionY) {
                 setDy(-dy);
             }
             // 옆면과 부딪혔을 경우
             else if(collisionX) {
                 setDx(-dx);
-            }
-            // 윗쪽, 아랫쪽과 부딪혔을 경우
-            else if(collisionY) {
-                setDy(-dy);
             }
         }
     }
