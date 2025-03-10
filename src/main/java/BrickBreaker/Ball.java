@@ -2,7 +2,6 @@ package BrickBreaker;
 
 import javafx.scene.paint.Color;
 
-import java.util.List;
 
 // TODO - Step10 : 이동하는 객체를 Movable 한 객체로 분류 및 오버라이딩
 // TODO - Step11 : Bounceable 성질 표현

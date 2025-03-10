@@ -9,9 +9,12 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -20,29 +23,29 @@ import java.util.List;
 
 public class Main extends Application {
     private boolean gameFinished = false; // 게임 완료 여부를 나타내는 플래그
+    private boolean moveLeft = false;   // 키보드 입력 여부 : 왼쪽 화살표
+    private boolean moveRight = false;  // 키보드 입력 여부 : 오른쪽 화살표
 
-    private boolean moveLeft = false;
-    private boolean moveRight = false;
+    private int score = 0; // 점수 표시할 변수
+
+    private Ball ball;
+    private Paddle paddle;
+    private Wall wall;
+    private List<Brick> bricks;
+    private List<Brick> toRemoveBricks; // 삭제할 벽돌 임시 저장용 리스트
+    private List<Shape> shapes;
+
+    private Canvas canvas;
+    private GraphicsContext gc;
 
     @Override
     public void start(Stage primaryStage) {
-        // Canvas 생성 (800 x 600 크기)
-        Canvas canvas = new Canvas(800, 600);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
+        // 초기 설정 : Canvas, GraphicContext, Objects
+        canvas = new Canvas(800, 600);
+        gc = canvas.getGraphicsContext2D();
+        initGameObjects();
 
-        // Ball, Paddle, Wall, 벽돌 생성
-        Ball ball = new Ball(400, 300, 10, 3, 3, Color.RED);
-        Paddle paddle = new Paddle(400, 550, 100, 20, 5, Color.BLUE);
-        Wall wall = new Wall(400, 300, 780, 580, Color.SANDYBROWN);
-        List<Brick> bricks = createBricks(5, 10, 70, 20, 5, 65, 50, Color.BLUE);
-
-        // TODO - Step09 : List<Shape> 로 통합 관리
-        List<Shape> shapes = new ArrayList<>();
-        shapes.add(ball);
-        shapes.add(paddle);
-        shapes.add(wall);
-
-        // 게임 루프
+        // 게임 시작
         AnimationTimer gameLoop = new AnimationTimer() {
             @Override
             public void handle(long now) {
@@ -55,45 +58,14 @@ public class Main extends Application {
                 gc.setFill(Color.BLACK);
                 gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
-                // TODO - Step09 :Drawable로 선언된 객체만 그리도록 수정
-                // 도형들 출력
-                for(Shape shape : shapes) {
-                    if(shape instanceof Drawable) {
-                        ((Drawable) shape).draw(gc);
-                    }
-                }
+                // TODO - Step09 :Drawable로 선언된 객체들만 출력
+                drawShapes();
 
-                // Ball 업데이트 및 충돌 확인
-                ball.update();
-                ball.checkCollision(wall);
-                // TODO - Step07 : 아직 블럭이 남아있는데 땅에 닿으면 게임 오버
-                if(wall.downCollision(ball) && !isAllBricksCleared(bricks)) {
-                    gameFinished = true;
-                    showGameOverPopup();
-                }
+                // 충돌 처리 및 객체들 상태 업데이트
+                updateStates();
 
-                // 벽돌 그리기 및 충돌 처리
-                for(Brick brick : bricks) {
-                    if(brick.checkCollision(ball)) {
-                        ball.setDy(-ball.getDy()); // 충돌 시 공의 y 방향 반전
-                    }
-                    if(!brick.isDestroyed()) // 부숴지지 않은 벽돌 출력
-                        brick.draw(gc);
-                }
-
-                // Paddle 움직임 처리
-                if(moveLeft) {
-                    paddle.moveLeft();
-                }
-                if(moveRight) {
-                    paddle.moveRight();
-                }
-                paddle.checkBounds(canvas.getWidth());
-
-                // TODO - Step07 : 패들과 부딪히면 공 튀겨냄
-                if(paddle.checkCollision(ball)) {
-                    ball.setDy(-ball.getDy()); // 충돌 시 공의 y 방향 반전
-                }
+                // 게임 종료 조건 만족 여부 확인
+                checkGameOver();
             }
         };
         gameLoop.start();
@@ -106,6 +78,22 @@ public class Main extends Application {
         primaryStage.setTitle("Brick Breaker");
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    // 오브젝트 설정 메서드
+    private void initGameObjects() {
+        ball = new Ball(400, 300, 10, 3, 3, Color.RED);
+        paddle = new Paddle(400, 550, 100, 20, 5, Color.BLUE);
+        wall = new Wall(400, 300, 780, 580, Color.SANDYBROWN);
+        bricks = createBricks(5, 10, 70, 20, 5, 65, 50, Color.BLUE);
+        toRemoveBricks = new ArrayList<>(); // 삭제할 벽돌 용 리스트
+
+        // TODO - Step09 : List<Shape> 로 통합 관리
+        shapes = new ArrayList<>();
+        shapes.add(ball);
+        shapes.add(paddle);
+        shapes.add(wall);
+        shapes.addAll(bricks);
     }
 
     // 벽돌 생성하는 메서드
@@ -121,6 +109,73 @@ public class Main extends Application {
             }
         }
         return bricks;
+    }
+
+    // 도형들 출력 메서드
+    private void drawShapes() {
+        for(Shape shape : shapes) {
+            if(shape instanceof Drawable) {
+                ((Drawable) shape).draw(gc);
+            }
+        }
+        // 점수 출력
+        gc.setFill(Color.WHITE);
+        gc.setFont(new Font(20));
+        gc.fillText("Score: " + score, 13, 30);
+    }
+
+    // 충돌 처리 및 상태 업데이트 메서드
+    private void updateStates() {
+        // Ball 움직이기 및 충돌 확인
+        ball.move();
+        if(ball.isCollisionDetected(wall)) {
+            wall.reflectBall(ball);
+        }
+
+
+        // TODO - Step12 : 깨진 벽돌 객체 삭제
+        // 벽돌 충돌 처리 -> 깨진 벽돌 삭제
+        for(Brick brick : bricks) {
+            if(ball.isCollisionDetected(brick)) {
+                brick.reflectBall(ball);
+                toRemoveBricks.add(brick);
+                score += 100; // 벽돌 당 100점 추가
+            }
+        }
+        bricks.removeAll(toRemoveBricks); // 벽돌 리스트에서 삭제
+        shapes.removeAll(toRemoveBricks); // 전체 객체 상태에도 반영
+        toRemoveBricks.clear();
+
+
+        // Paddle 움직임 처리 및 충돌 확인
+        if(moveLeft) {
+            paddle.moveLeft();
+        }
+        if(moveRight) {
+            paddle.moveRight();
+        }
+        paddle.checkBounds(wall);
+        // TODO - Step07 : 패들과 부딪히면 공 튕겨냄
+        if(ball.isCollisionDetected(paddle)) {
+            paddle.reflectBall(ball);
+        }
+    }
+
+    // 게임 종료 조건 확인 메서드
+    private void checkGameOver() {
+        // TODO - Step07 : 게임 종료 조건 (블록 모두 클리어 or 그 전에 공에 바닥에 닿으면 게임 오버)
+        if(wall.downCollision(ball) && !isAllBricksCleared(bricks)) {
+            gameFinished = true;
+            showGameOverPopup();
+        }
+        if(isAllBricksCleared(bricks)) {
+            gameFinished = true;
+            showGameWinPopup();
+        }
+    }
+    // TODO - Chap07 : 클리어 조건 확인 메서드 (모든 블럭 제거)
+    private boolean isAllBricksCleared(List<Brick> bricks) {
+        return bricks.isEmpty();
     }
 
     // 키보드 핸들러 익명 함수 처리 메서드
@@ -141,20 +196,26 @@ public class Main extends Application {
         });
     }
 
-    // TODO - Chap07 : 클리어 조건 확인 메서드 (모든 블럭 제거)
-    private boolean isAllBricksCleared(List<Brick> bricks) {
-        for(Brick brick : bricks) {
-            if(!brick.isDestroyed())
-                return false;
-        }
-        return true;
-    }
-
     // 팝업을 표시하고 종료하는 메서드
     private void showGameOverPopup() {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION, "Game Over! Thank you for playing.", ButtonType.OK);
             alert.setTitle("Game Over");
+            alert.setHeaderText(null);
+
+            // 팝업 닫기 후 게임 종료
+            alert.showAndWait().ifPresent(response -> {
+                if(response == ButtonType.OK) {
+                    Platform.exit(); // 게임 종료
+                }
+            });
+        });
+    }
+    // 게임 승리 팝업 표시하고 종료하는 메서드
+    private void showGameWinPopup() {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Good Job! All Bricks cleared.", ButtonType.OK);
+            alert.setTitle("You Win!");
             alert.setHeaderText(null);
 
             // 팝업 닫기 후 게임 종료
